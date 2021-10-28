@@ -82,7 +82,7 @@ class Protocol:
             print("Received INIT")
             # Extract message contents
             tokenized_msg = message.decode().split("$", 3) # Only splits on first three $'s
-            
+                        
             if len(tokenized_msg) < 4:
                 self.AbortConnection("Connection Aborted: Invalid Message Format")
             
@@ -126,15 +126,12 @@ class Protocol:
             cipher_text = tokenized_msg[2]
 
             # Extract plaintext contents
-            print("A")
             plain_text = AESCipher(self.shared_secret).decrypt(cipher_text)
             tokenized_plain_text = plain_text.split("$", 2)  #TODO: check size of tokenized plain text
             
-            print("B")
             if len(tokenized_plain_text) < 3:
                 self.AbortConnection("Connection Aborted: Invalid Plaintext Format")
             
-            print("C")
             sender = tokenized_plain_text[0]
             sender_exponent = tokenized_plain_text[1]
             sender_solution = tokenized_plain_text[2]
@@ -157,12 +154,10 @@ class Protocol:
             # Generate a response to the challenge
             challenge_response = challenge
             
-            print("D")
             # Encrypt our identity and h(R2)
             sensitive_data = f"{self.identity}${challenge_response}"
             encrypted_payload = AESCipher(self.shared_secret).encrypt(sensitive_data)
             
-            print("E")
             # Format the message to match our protocol
             # E("ALICE", h(R2), Kab)
             response = f"ACKK${encrypted_payload}"
@@ -187,6 +182,8 @@ class Protocol:
             if int(sender_solution) != self.nonce:
                 self.AbortConnection("Connection Aborted: Received Wrong Challenge Response")
             
+            print("Connection Secured")
+
             return ""
 
         else:
