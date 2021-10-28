@@ -115,6 +115,7 @@ class Protocol:
             return response
 
         elif msg_type == "SQCK":
+            print("Received SQCK")
             # Extract message contents
             tokenized_msg = message.decode().split("$", 2) # Only splits on first two $'s #TODO: check size of tokenized msg
             
@@ -125,12 +126,15 @@ class Protocol:
             cipher_text = tokenized_msg[2]
 
             # Extract plaintext contents
+            print("A")
             plain_text = AESCipher(self.shared_secret).decrypt(cipher_text)
             tokenized_plain_text = plain_text.split("$", 2)  #TODO: check size of tokenized plain text
             
+            print("B")
             if len(tokenized_plain_text) < 3:
                 self.AbortConnection("Connection Aborted: Invalid Plaintext Format")
             
+            print("C")
             sender = tokenized_plain_text[0]
             sender_exponent = tokenized_plain_text[1]
             sender_solution = tokenized_plain_text[2]
@@ -153,16 +157,19 @@ class Protocol:
             # Generate a response to the challenge
             challenge_response = challenge
             
+            print("D")
             # Encrypt our identity and h(R2)
             sensitive_data = f"{self.identity}${challenge_response}"
             encrypted_payload = AESCipher(self.shared_secret).encrypt(sensitive_data)
             
+            print("E")
             # Format the message to match our protocol
             # E("ALICE", h(R2), Kab)
             response = f"ACKK${encrypted_payload}"
             return response
 
         elif msg_type == "ACKK":
+            print("Received ACKK")
             tokenized_msg = message.decode().split("$", 1) # Only splits on the first $
             cipher_text = tokenized_msg[1]
             
