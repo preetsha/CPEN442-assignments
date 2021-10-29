@@ -52,7 +52,7 @@ class Assignment3VPN:
         
         # Creating a protocol object
         self.prtcl = Protocol(self.sharedSecret)
-     
+
     # Distructor     
     def __del__(self):
         # Closing the network socket
@@ -116,7 +116,7 @@ class Assignment3VPN:
             self._AppendLog("CONNECTION: connection failed: {}".format(str(e)))
             return False
             
-     
+
     # Accepting connections in a separate thread
     def _AcceptConnections(self):
         try:

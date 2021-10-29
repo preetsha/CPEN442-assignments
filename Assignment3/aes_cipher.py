@@ -16,18 +16,10 @@ class AESCipher(object):
             
 
     def encrypt(self, plaintext):
-        #print(f"Encrypting: {plaintext}")
-        # while len(plaintext) % 16 != 0:
-        #     plaintext += '\x00'
         ciphertext = self.cipher.encrypt(pad(plaintext.encode(), 16))
         return base64.b64encode(ciphertext).decode()
 
     def decrypt(self, ciphertext):
-        #print(f"Decrypting: {ciphertext}, Length of Ciphertext: {len(ciphertext)}")
-        ciphertext_bytes = base64.b64decode(ciphertext)#ast.literal_eval(ciphertext)
-        # while len(ciphertext) % 16 != 0:
-        #     ciphertext += '\x00'
-        # plaintext = ciphertext[len(str(self.key)):len(ciphertext)]
+        ciphertext_bytes = base64.b64decode(ciphertext)
         plaintext = unpad(self.cipher.decrypt(ciphertext_bytes), 16)
-        # print(f"Result    : {plaintext}")
         return plaintext.decode('utf-8')

@@ -8,7 +8,7 @@ class Protocol:
     def __init__(self, shared_secret):
         self._key = None
 
-        # Set the secre
+        # Set the secret
         self.shared_secret = shared_secret.get()
         
         # If shared secret is too long, cut it down to 16 chars (128 bits) for AES
@@ -65,8 +65,10 @@ class Protocol:
         # Check if message starts with the proper protocol tags
         if self.identity == "ALICE":
             return tokenized_msg[0] in ["SQCK"]
-        else:
+        elif self.identity == "BOB":
             return tokenized_msg[0] in ["INIT", "ACKK"]
+        else:
+            return False
 
     # Processing protocol message
     # TODO: IMPLEMENT THE LOGIC (CALL SetSessionKey ONCE YOU HAVE THE KEY ESTABLISHED)
@@ -96,7 +98,6 @@ class Protocol:
 
             # Generate a response to the challenge
             challenge_response = challenge
-            # challenge_response = hashlib.sha256(challenge.encode()).hexdigest()
             plain_text = AESCipher(self.shared_secret).decrypt(cipher_text)
 
             # TODO Maybe sanitize the input here
@@ -120,7 +121,7 @@ class Protocol:
             tokenized_msg = message.decode().split("$", 2) # Only splits on first two $'s #TODO: check size of tokenized msg
             
             if len(tokenized_msg) < 2:
-                self.AbortConnection("Connection Aborted: Invalid Plaintext Formet")
+                self.AbortConnection("Connection Aborted: Invalid Plaintext Format")
             
             challenge = tokenized_msg[1]
             cipher_text = tokenized_msg[2]
@@ -146,7 +147,6 @@ class Protocol:
 
             # TODO Maybe sanitize the input here
             # TODO should this be inside the brackets instead?
-            # pow(int(sender_exponent), self.secret_expoonent, self.p)
             # maybe sender exponent should be like sender_generated_value since they
             # send g^a mod p/g^b mod p and not just a/b
             self.SetSessionKey(pow(int(sender_exponent), self.secret_exponent, self.p))
