@@ -156,7 +156,11 @@ class Assignment3VPN:
                     # Processing the protocol message
                     result = self.prtcl.ProcessReceivedProtocolMessage(cipher_text)
                     if result:
+                        if "ACKK$" in result:
+                            self._AppendLog("Connection Secured")
                         self.conn.send(result.encode())
+                    else:
+                        self._AppendLog("Connection Secured")
 
                 # Otherwise, decrypting and showing the messaage
                 else:

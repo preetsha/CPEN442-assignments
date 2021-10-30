@@ -8,7 +8,7 @@ def formatKey(key):
         if isinstance(key, str):
             AES_key = AES_key.encode()
         else:
-            AES_key = AES_key % 65536
+            AES_key = AES_key % pow(2, 128)
             AES_key = AES_key.to_bytes(16, 'big')
         return AES_key
 
