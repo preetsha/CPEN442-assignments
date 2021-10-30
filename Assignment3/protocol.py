@@ -4,7 +4,6 @@ import hashlib
 from aes_cipher import AESCipher
 class Protocol:
     # Initializer (Called from app.py)
-    # TODO: MODIFY ARGUMENTS AND LOGIC AS YOU SEEM FIT
     def __init__(self, shared_secret):
         self._key = None
 
@@ -65,14 +64,10 @@ class Protocol:
         # Check if message starts with the proper protocol tags
         if self.identity == "ALICE":
             return tokenized_msg[0] in ["SQCK"]
-        elif self.identity == "BOB":
-            return tokenized_msg[0] in ["INIT", "ACKK"]
         else:
-            return False
+            return tokenized_msg[0] in ["INIT", "ACKK"]
 
     # Processing protocol message
-    # TODO: IMPLEMENT THE LOGIC (CALL SetSessionKey ONCE YOU HAVE THE KEY ESTABLISHED)
-    # THROW EXCEPTION IF AUTHENTICATION FAILS
     def ProcessReceivedProtocolMessage(self, message):        
         # Set this instance as the receiver
         self.identity = "BOB" if self.identity == None else self.identity
@@ -98,10 +93,8 @@ class Protocol:
 
             # Generate a response to the challenge
             challenge_response = challenge
-            plain_text = AESCipher(self.shared_secret).decrypt(cipher_text)
+            plain_text = AESCipher().decrypt(self.shared_secret, cipher_text)
 
-            # TODO Maybe sanitize the input here
-            # TODO should this be inside the brackets instead?
             self.SetSessionKey(pow(int(plain_text), self.secret_exponent, self.p))
 
             # Encrypt our identity, g^b mod p, and h(R1)
@@ -127,7 +120,7 @@ class Protocol:
             cipher_text = tokenized_msg[2]
 
             # Extract plaintext contents
-            plain_text = AESCipher(self.shared_secret).decrypt(cipher_text)
+            plain_text = AESCipher().decrypt(self.shared_secret, cipher_text)
             tokenized_plain_text = plain_text.split("$", 2)  #TODO: check size of tokenized plain text
             
             if len(tokenized_plain_text) < 3:
@@ -145,8 +138,6 @@ class Protocol:
             if int(sender_solution) != self.nonce:
                 self.AbortConnection("Connection Aborted: Received Wrong Challenge Response")
 
-            # TODO Maybe sanitize the input here
-            # TODO should this be inside the brackets instead?
             # maybe sender exponent should be like sender_generated_value since they
             # send g^a mod p/g^b mod p and not just a/b
             self.SetSessionKey(pow(int(sender_exponent), self.secret_exponent, self.p))
@@ -169,7 +160,7 @@ class Protocol:
             cipher_text = tokenized_msg[1]
             
             # Extract plaintext contents
-            plain_text = AESCipher(self.shared_secret).decrypt(cipher_text)
+            plain_text = AESCipher().decrypt(self.shared_secret, cipher_text)
             tokenized_plain_text = plain_text.split("$", 1)
             sender = tokenized_plain_text[0]
             sender_solution = tokenized_plain_text[1]
@@ -199,8 +190,6 @@ class Protocol:
         return self._key
 
     # Encrypting messages
-    # TODO: IMPLEMENT ENCRYPTION WITH THE SESSION KEY (ALSO INCLUDE ANY NECESSARY INFO IN THE ENCRYPTED MESSAGE FOR INTEGRITY PROTECTION)
-    # RETURN AN ERROR MESSAGE IF INTEGRITY VERITIFCATION OR AUTHENTICATION FAILS
     def EncryptAndProtectMessage(self, plain_text):
         # Encrypt with the session key if both parties have it
         if self.GetSessionKey():
@@ -218,12 +207,10 @@ class Protocol:
 
 
     # Decrypting and verifying messages
-    # TODO: IMPLEMENT DECRYPTION AND INTEGRITY CHECK WITH THE SESSION KEY
-    # RETURN AN ERROR MESSAGE IF INTEGRITY VERITIFCATION OR AUTHENTICATION FAILS
     def DecryptAndVerifyMessage(self, cipher_text):
         # Decrypt the message if a session key has been established
         if self.GetSessionKey():
-            message = AESCipher(self.GetSessionKey()).decrypt(cipher_text.decode())
+            message = AESCipher().decrypt(self.GetSessionKey(), cipher_text.decode())
             
             # Extract message contents
             tokenized_message = message.split("$", 1)
